@@ -3,6 +3,7 @@ package com.codescala.habitual.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
@@ -10,6 +11,7 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.codescala.habitual.presentation.habits.MyHabitsScreen
 import com.codescala.habitual.presentation.habits.addhabit.AddHabitScreen
+import com.codescala.habitual.presentation.habits.addhabit.AddHabitViewModel
 import com.codescala.habitual.presentation.home.HomeScreen
 import com.codescala.habitual.presentation.home.HomeViewModel
 import com.codescala.habitual.presentation.onboarding.OnboardingScreen
@@ -49,7 +51,7 @@ fun HabitualNavDisplay(
                 )
             }
             entry<Screen.AddHabit> {
-                AddHabitScreen()
+                AddHabitScreen(viewModel = hiltViewModel<AddHabitViewModel>())
             }
         }
     )

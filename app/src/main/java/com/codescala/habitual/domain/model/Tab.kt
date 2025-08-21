@@ -11,7 +11,7 @@ data class Tab(
 )
 
 val tabs = listOf(
-    Tab(title = "Dashboard", id = NavTab.HomeTab, icon = R.drawable.ic_exercise_habit_24dp),
-    Tab(title = "My Habits", id = NavTab.HabitTab, icon = R.drawable.ic_exercise_habit_24dp),
-    Tab(title = "Profile", id = NavTab.ProfileTab, icon = R.drawable.ic_exercise_habit_24dp),
+    Tab(title = "Dashboard", id = NavTab.HomeTab, icon = R.drawable.ic_home),
+    Tab(title = "My Habits", id = NavTab.HabitTab, icon = R.drawable.ic_habit_list),
+    Tab(title = "Profile", id = NavTab.ProfileTab, icon = R.drawable.ic_profile),
 )
