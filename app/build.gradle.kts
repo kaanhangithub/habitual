@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.room)
     implementation(libs.room.ktx)
+    implementation(libs.material3)
     ksp(libs.room.compiler)
     implementation(libs.hilt)
     implementation(libs.hilt.navigation)

@@ -9,3 +9,14 @@ enum class Frequency {
     DAILY,
     SPECIFIC_DAYS
 }
+
+val frequencyList = listOf(
+    HabitFrequency(
+        title = "Daily",
+        frequency = Frequency.DAILY
+    ),
+    HabitFrequency(
+        title = "Specific Days",
+        frequency = Frequency.SPECIFIC_DAYS
+    )
+)

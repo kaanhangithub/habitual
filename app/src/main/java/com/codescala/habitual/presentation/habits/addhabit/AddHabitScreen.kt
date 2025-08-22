@@ -3,6 +3,7 @@ package com.codescala.habitual.presentation.habits.addhabit
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,7 +24,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -32,16 +33,15 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,7 +53,10 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codescala.habitual.R
+import com.codescala.habitual.presentation.common.PreviewData
+import com.codescala.habitual.presentation.common.PreviewData.AddHabitScreen
 import com.codescala.habitual.presentation.common.UiAction
+import com.codescala.habitual.presentation.habits.addhabit.data.Category
 import com.codescala.habitual.presentation.habits.addhabit.data.Day
 import com.codescala.habitual.presentation.habits.addhabit.data.Frequency
 import com.codescala.habitual.presentation.habits.addhabit.data.HabitFrequency
@@ -72,11 +75,20 @@ fun AddHabitScreen(
     viewModel: AddHabitViewModel
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
+    val showCategoryBottomSheet by viewModel.showCategoryBottomSheet.collectAsStateWithLifecycle()
+
     AddHabitUI(
         modifier = modifier,
         state = state,
         uiAction = viewModel::onAction
     )
+
+    if (showCategoryBottomSheet) {
+        CategoryBottomSheet(
+            state = state,
+            uiAction = viewModel::onAction
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,7 +152,10 @@ private fun AddHabitContent(
        }
 
         item {
-            CategoryPicker()
+            CategoryPicker(
+                state = state,
+                uiAction = uiAction
+            )
         }
 
         item {
@@ -183,66 +198,48 @@ private fun AddHabitContent(
 }
 
 @Composable
-private fun CategoryPicker(modifier: Modifier = Modifier) {
-    var isExpanded by remember { mutableStateOf(false) }
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(12.dp)
-            ),
-
-        ){
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        isExpanded = !isExpanded
-                    }
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
+private fun CategoryPicker(
+    modifier: Modifier = Modifier,
+    state: AddHabitState,
+    uiAction: (UiAction) -> Unit
+) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable {
+                    uiAction(UiAction.ShowBottomSheet)
+                }
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = spacedBy(12.dp)
+        ) {
+            state.category?.let {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(it.icon),
+                    contentDescription = "Category icon",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
                 Text(
-                    text = "Category",
+                    text = it.title,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Drop down",
-                    tint = MaterialTheme.colorScheme.secondary
+            } ?: run {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = "Select Category",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            AnimatedVisibility(
-                visible = isExpanded,
-                modifier = Modifier,
-            ) {
-                repeat(5) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ){
-                        Text(
-                            text = "Category",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Icon(
-                            painter = painterResource(R.drawable.ic_plus),
-                            contentDescription = "Drop down",
-                        )
-                    }
-                }
-            }
         }
-    }
 }
 
 @Composable
@@ -256,7 +253,7 @@ private fun HabitNotes(
         onValueChange = {
             uiAction(UiAction.EditHabitNote(it))
         },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(170.dp),
         textStyle = MaterialTheme.typography.bodyLarge,
@@ -421,6 +418,87 @@ private fun HabitTitle(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryBottomSheet (
+    modifier: Modifier = Modifier,
+    state: AddHabitState,
+    uiAction: (UiAction) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        modifier = modifier.fillMaxWidth(),
+        onDismissRequest = { uiAction(UiAction.DismissBottomSheet) },
+        sheetState = sheetState,
+        scrimColor = Color.Black.copy(alpha = 0.32f),
+        containerColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+    ) {
+        BottomSheetContent(
+            state = state,
+            uiAction = uiAction
+        )
+    }
+}
+
+@Composable
+private fun BottomSheetContent(
+    modifier: Modifier = Modifier,
+    state: AddHabitState,
+    uiAction: (UiAction) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Select Category",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = spacedBy(12.dp),
+            verticalArrangement = spacedBy(12.dp)
+        ) {
+            items(state.categoryList) { category ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable {
+                            uiAction(UiAction.SelectHabitCategory(category))
+                            uiAction(UiAction.DismissBottomSheet)
+                                   },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = spacedBy(12.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.padding(start = 16.dp),
+                        painter = painterResource(id = category.icon),
+                        contentDescription = "Category icon",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = category.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun AddHabitSuccessStatePreview() {
@@ -428,7 +506,10 @@ private fun AddHabitSuccessStatePreview() {
         AddHabitUI(
             state = AddHabitState(
                 habitName = "Running",
-                category = "Sports",
+                category = Category(
+                    title = "Select category",
+                    icon = R.drawable.ic_launcher_foreground
+                ),
                 frequency = Frequency.DAILY,
                 notes = "Running is great",
                 selectedDays = emptySet(),
@@ -443,6 +524,7 @@ private fun AddHabitSuccessStatePreview() {
                         Frequency.SPECIFIC_DAYS
                     )
                 ),
+                categoryList = emptyList(),
                 daysOfWeekList = listOf(
                         Day(
                             "Mon",
@@ -477,4 +559,16 @@ private fun AddHabitSuccessStatePreview() {
             uiAction =  {}
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BottomSheetPreview() {
+    HabitualTheme { 
+        BottomSheetContent(
+            state = AddHabitScreen.screenState,
+            uiAction = {}
+        )
+    }
+    
 }

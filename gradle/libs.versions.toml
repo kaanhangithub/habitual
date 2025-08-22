@@ -19,6 +19,7 @@ hilt = "2.56.2"
 hiltAndroidX = "1.2.0"
 composeIcon = "1.7.8"
 wheelPicker = "1.1.11"
+material3 = "1.3.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,6 +54,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltAndroidX" }
 # Other
 wheel-picker = { module = "com.github.commandiron:WheelPickerCompose", version.ref = "wheelPicker" }
+material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 
 [plugins]
