@@ -4,13 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -35,6 +32,8 @@ import com.codescala.habitual.navigation.HabitualNavDisplay
 import com.codescala.habitual.navigation.NavManager
 import com.codescala.habitual.navigation.Screen
 import com.codescala.habitual.navigation.NavTab
+import com.codescala.habitual.navigation.isFullScreen
+import com.codescala.habitual.navigation.showSnackBar
 import com.codescala.habitual.ui.theme.BackGroundBlack
 import com.codescala.habitual.ui.theme.HabitualTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,11 +51,11 @@ class MainActivity : ComponentActivity() {
             HabitualTheme {
                 Scaffold(
                     bottomBar = {
-                        if (navManager.getCurrentScreen() != Screen.Onboarding)
+                        if (!navManager.currentScreen.isFullScreen())
                             BottomNavigationBar(navManager = navManager)
                     },
                     floatingActionButton = {
-                        if (navManager.getCurrentScreen() != Screen.Onboarding)
+                        if (navManager.currentScreen.showSnackBar())
                             FloatingActionButton(
                                 onClick = {navManager.navigateToScreen(Screen.AddHabit)},
                                 containerColor = MaterialTheme.colorScheme.primary,

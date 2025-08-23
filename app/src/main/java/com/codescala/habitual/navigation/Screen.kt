@@ -1,6 +1,8 @@
 package com.codescala.habitual.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.codescala.habitual.navigation.Screen.AddHabit
+import com.codescala.habitual.navigation.Screen.Onboarding
 import kotlinx.serialization.Serializable
 
 sealed class Screen : NavKey {
@@ -17,3 +19,6 @@ sealed class Screen : NavKey {
     @Serializable
     data class HabitDetails(val habitId: Int): Screen()
 }
+
+fun Screen.isFullScreen() = this is Onboarding
+fun Screen.showSnackBar() = this !is Onboarding && this !is AddHabit

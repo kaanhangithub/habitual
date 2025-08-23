@@ -1,7 +1,6 @@
 package com.codescala.habitual.presentation.habits.addhabit
 
 import androidx.lifecycle.ViewModel
-import com.codescala.habitual.R
 import com.codescala.habitual.presentation.common.UiAction
 import com.codescala.habitual.presentation.common.UiActionHandler
 import com.codescala.habitual.presentation.habits.addhabit.data.Category
@@ -47,7 +46,7 @@ class AddHabitViewModel @Inject constructor() :  ViewModel(), UiActionHandler {
                 _screenState.update { _screenState.value.copy(notes = action.text) }
             }
             is UiAction.SelectHabitCategory -> {
-                _screenState.update { _screenState.value.copy(category = action.category) }
+                selectCategory(action.category)
             }
             is UiAction.SelectScheduleType -> {
                 _screenState.update { _screenState.value.copy(frequency = action.type) }
@@ -81,5 +80,15 @@ class AddHabitViewModel @Inject constructor() :  ViewModel(), UiActionHandler {
             days.add(day)
         }
         _screenState.update { _screenState.value.copy(selectedDays = days.toSet()) }
+    }
+
+    private fun selectCategory(category: Category) {
+        val categoryList = _screenState.value.categoryList.toMutableList()
+        val priorityList = categoryList.take(3)
+        if (!priorityList.contains(category)) {
+            categoryList.remove(category)
+            categoryList.add(0,category)
+        }
+        _screenState.update { _screenState.value.copy(categoryList = categoryList, category = category) }
     }
 }

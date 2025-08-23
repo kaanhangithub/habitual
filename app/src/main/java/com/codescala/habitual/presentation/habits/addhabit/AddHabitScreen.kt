@@ -2,20 +2,19 @@ package com.codescala.habitual.presentation.habits.addhabit
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -44,7 +43,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,13 +55,13 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codescala.habitual.R
-import com.codescala.habitual.presentation.common.PreviewData
 import com.codescala.habitual.presentation.common.PreviewData.AddHabitScreen
 import com.codescala.habitual.presentation.common.UiAction
 import com.codescala.habitual.presentation.habits.addhabit.data.Category
 import com.codescala.habitual.presentation.habits.addhabit.data.Day
 import com.codescala.habitual.presentation.habits.addhabit.data.Frequency
 import com.codescala.habitual.presentation.habits.addhabit.data.HabitFrequency
+import com.codescala.habitual.presentation.habits.addhabit.data.habitCategoryList
 import com.codescala.habitual.presentation.habits.addhabit.screenstate.AddHabitState
 import com.codescala.habitual.ui.theme.BackGroundBlack
 import com.codescala.habitual.ui.theme.HabitualTheme
@@ -140,13 +142,18 @@ private fun AddHabitContent(
     state: AddHabitState,
     uiAction: (UiAction) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier
+            .pointerInput(Unit) {
+            detectTapGestures(onTap = { focusManager.clearFocus() })
+        },
         verticalArrangement = spacedBy(24.dp),
     ) {
        item {
            HabitTitle(
                state = state,
+               focusManager = focusManager,
                uiAction = uiAction
            )
        }
@@ -203,43 +210,83 @@ private fun CategoryPicker(
     state: AddHabitState,
     uiAction: (UiAction) -> Unit
 ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(12.dp)
+    Column(
+        modifier = modifier
+    ) {
+        Text(
+            text = "Category",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineMedium
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        LazyVerticalGrid(
+            modifier = Modifier.heightIn(max = 200.dp),
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = spacedBy(12.dp),
+            verticalArrangement = spacedBy(12.dp)
+        ){
+            items(
+                items = state.categoryList.take(3),
+                key = { item -> item.title }
+            ) {
+                FilterChip(
+                    selected = it == state.category,
+                    modifier = Modifier.height(58.dp),
+                    onClick = {
+                        uiAction(UiAction.SelectHabitCategory(it))
+                    },
+                    label = {
+                        Text(
+                            text = it.title,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            modifier = Modifier.padding(start = 16.dp),
+                            painter = painterResource(id = it.icon),
+                            contentDescription = "Category icon",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.background,
+                    ),
+                    border = if(it != state.category) BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline) else null,
+                    shape = RoundedCornerShape(12.dp),
                 )
-                .clickable {
-                    uiAction(UiAction.ShowBottomSheet)
-                }
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = spacedBy(12.dp)
-        ) {
-            state.category?.let {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(it.icon),
-                    contentDescription = "Category icon",
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = it.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            } ?: run {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    text = "Select Category",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+            }
+
+            item {
+                FilterChip(
+                    selected = false,
+                    modifier = Modifier.height(58.dp),
+                    onClick = {
+                        uiAction(UiAction.ShowBottomSheet)
+                    },
+                    label = {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "More",
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.background,
+                    ),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+                    shape = RoundedCornerShape(12.dp),
                 )
             }
         }
+    }
 }
 
 @Composable
@@ -316,7 +363,7 @@ private fun HabitSchedulePicker(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         containerColor = MaterialTheme.colorScheme.background,
                     ),
-                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+                    border = if(it.frequency != state.frequency) BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline) else null,
                     shape = RoundedCornerShape(12.dp),
                 )
             }
@@ -336,7 +383,10 @@ private fun HabitSchedulePicker(
                     horizontalArrangement = spacedBy(12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    items(state.daysOfWeekList) { day ->
+                    items(
+                        items = state.daysOfWeekList,
+                        key = { item -> item.name }
+                    ) { day ->
                         FilterChip(
                             modifier = Modifier.height(40.dp),
                             selected = state.selectedDays.contains(day),
@@ -385,6 +435,7 @@ private fun HabitSchedulePicker(
 private fun HabitTitle(
     modifier: Modifier = Modifier,
     state: AddHabitState,
+    focusManager: FocusManager,
     uiAction: (UiAction) -> Unit
 ) {
     TextField(
@@ -465,7 +516,10 @@ private fun BottomSheetContent(
             horizontalArrangement = spacedBy(12.dp),
             verticalArrangement = spacedBy(12.dp)
         ) {
-            items(state.categoryList) { category ->
+            items(
+                items = state.categoryList,
+                key = { item -> item.title }
+            ) { category ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -504,58 +558,7 @@ private fun BottomSheetContent(
 private fun AddHabitSuccessStatePreview() {
     HabitualTheme {
         AddHabitUI(
-            state = AddHabitState(
-                habitName = "Running",
-                category = Category(
-                    title = "Select category",
-                    icon = R.drawable.ic_launcher_foreground
-                ),
-                frequency = Frequency.DAILY,
-                notes = "Running is great",
-                selectedDays = emptySet(),
-                selectedTime = LocalTime.now(),
-                frequencyList = listOf(
-                    HabitFrequency(
-                        "Daily",
-                        Frequency.DAILY
-                    ),
-                    HabitFrequency(
-                        "Specific Days",
-                        Frequency.SPECIFIC_DAYS
-                    )
-                ),
-                categoryList = emptyList(),
-                daysOfWeekList = listOf(
-                        Day(
-                            "Mon",
-                            DayOfWeek.MONDAY
-                        ),
-                        Day(
-                            "Tue",
-                            DayOfWeek.TUESDAY
-                        ),
-                        Day(
-                            "Wed",
-                            DayOfWeek.WEDNESDAY
-                        ),
-                        Day(
-                            "Thu",
-                            DayOfWeek.THURSDAY
-                        ),
-                        Day(
-                            "Fri",
-                            DayOfWeek.FRIDAY
-                        ),
-                        Day(
-                            "Sat",
-                            DayOfWeek.SATURDAY
-                        ),
-                        Day(
-                            "Sun",
-                            DayOfWeek.SUNDAY
-                        )
-                )
-            ),
+            state = AddHabitScreen.screenState,
             uiAction =  {}
         )
     }

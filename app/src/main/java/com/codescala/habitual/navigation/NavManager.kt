@@ -8,9 +8,11 @@ class NavManager @Inject constructor() {
     private val stackMap = hashMapOf<NavTab, SnapshotStateList<Screen>>()
     private var currentTab : NavTab? = null
     val currentStack = mutableStateListOf<Screen>(Screen.Onboarding)
+    val currentScreen: Screen
+        get() = currentStack.lastOrNull() ?: Screen.Onboarding
 
     fun navigateToScreen(screen: Screen) {
-        if (currentStack[currentStack.lastIndex] != screen) {
+        if (currentScreen != screen) {
             currentStack.add(screen)
             currentTab?.let {
                 stackMap[it]?.add(screen)
@@ -19,9 +21,12 @@ class NavManager @Inject constructor() {
     }
 
     fun navigateBack() {
-        currentStack.removeAt(currentStack.lastIndex)
-        currentTab?.let {
-            stackMap[it]?.removeAt(currentStack.lastIndex)
+        val lastIndex = currentStack.lastIndex
+        if(lastIndex > 0) {
+            currentStack.removeAt(lastIndex)
+            currentTab?.let {
+                stackMap[it]?.removeAt(lastIndex)
+            }
         }
     }
 
@@ -40,6 +45,4 @@ class NavManager @Inject constructor() {
             currentStack.addAll(stackMap[tab] ?: mutableStateListOf(Screen.Home))
         }
     }
-
-    fun getCurrentScreen(): Screen = currentStack[currentStack.lastIndex]
 }

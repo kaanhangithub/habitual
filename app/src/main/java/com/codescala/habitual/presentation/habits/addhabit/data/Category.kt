@@ -81,4 +81,8 @@ val habitCategoryList = listOf(
         "Volunteering",
         R.drawable.ic_habit_volunteer
     ),
+    Category(
+        "Other",
+        R.drawable.ic_habit_no_category
+    ),
 )
