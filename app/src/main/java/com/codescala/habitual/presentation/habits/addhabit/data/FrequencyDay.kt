@@ -2,38 +2,38 @@ package com.codescala.habitual.presentation.habits.addhabit.data
 
 import java.time.DayOfWeek
 
-data class Day(
+data class FrequencyDay(
     val name: String,
     val type: DayOfWeek,
     var selected: Boolean = false
 )
 
 val daysOfWeekList = listOf(
-    Day(
+    FrequencyDay(
         "Mon",
         DayOfWeek.MONDAY
     ),
-    Day(
+    FrequencyDay(
         "Tue",
         DayOfWeek.TUESDAY
     ),
-    Day(
+    FrequencyDay(
         "Wed",
         DayOfWeek.WEDNESDAY
     ),
-    Day(
+    FrequencyDay(
         "Thu",
         DayOfWeek.THURSDAY
     ),
-    Day(
+    FrequencyDay(
         "Fri",
         DayOfWeek.FRIDAY
     ),
-    Day(
+    FrequencyDay(
         "Sat",
         DayOfWeek.SATURDAY
     ),
-    Day(
+    FrequencyDay(
         "Sun",
         DayOfWeek.SUNDAY
     )

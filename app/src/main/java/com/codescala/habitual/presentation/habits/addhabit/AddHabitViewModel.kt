@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.codescala.habitual.presentation.common.UiAction
 import com.codescala.habitual.presentation.common.UiActionHandler
 import com.codescala.habitual.presentation.habits.addhabit.data.Category
-import com.codescala.habitual.presentation.habits.addhabit.data.Day
+import com.codescala.habitual.presentation.habits.addhabit.data.FrequencyDay
 import com.codescala.habitual.presentation.habits.addhabit.data.Frequency
 import com.codescala.habitual.presentation.habits.addhabit.data.daysOfWeekList
 import com.codescala.habitual.presentation.habits.addhabit.data.frequencyList
@@ -54,7 +54,7 @@ class AddHabitViewModel @Inject constructor() :  ViewModel(), UiActionHandler {
             is UiAction.SelectTime -> {
                 _screenState.update { _screenState.value.copy(selectedTime = action.time) }
             }
-            is UiAction.ToggleSelectDay -> {
+            is UiAction.ToggleSelectFrequencyDay -> {
                 toggleSelectedDays(action.day)
             }
             is UiAction.SaveHabit -> {
@@ -72,7 +72,7 @@ class AddHabitViewModel @Inject constructor() :  ViewModel(), UiActionHandler {
         }
     }
 
-    private fun toggleSelectedDays(day: Day) {
+    private fun toggleSelectedDays(day: FrequencyDay) {
         val days = _screenState.value.selectedDays.toMutableSet()
         if(days.contains(day)) {
             days.remove(day)

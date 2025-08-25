@@ -54,22 +54,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.codescala.habitual.R
 import com.codescala.habitual.presentation.common.PreviewData.AddHabitScreen
 import com.codescala.habitual.presentation.common.UiAction
-import com.codescala.habitual.presentation.habits.addhabit.data.Category
-import com.codescala.habitual.presentation.habits.addhabit.data.Day
 import com.codescala.habitual.presentation.habits.addhabit.data.Frequency
-import com.codescala.habitual.presentation.habits.addhabit.data.HabitFrequency
-import com.codescala.habitual.presentation.habits.addhabit.data.habitCategoryList
 import com.codescala.habitual.presentation.habits.addhabit.screenstate.AddHabitState
 import com.codescala.habitual.ui.theme.BackGroundBlack
 import com.codescala.habitual.ui.theme.HabitualTheme
 import com.commandiron.wheel_picker_compose.WheelTimePicker
 import com.commandiron.wheel_picker_compose.core.TimeFormat
 import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
-import java.time.DayOfWeek
-import java.time.LocalTime
 
 @Composable
 fun AddHabitScreen(
@@ -391,7 +384,7 @@ private fun HabitSchedulePicker(
                             modifier = Modifier.height(40.dp),
                             selected = state.selectedDays.contains(day),
                             onClick = {
-                                uiAction(UiAction.ToggleSelectDay(day))
+                                uiAction(UiAction.ToggleSelectFrequencyDay(day))
                             },
                             label = {
                                 Text(

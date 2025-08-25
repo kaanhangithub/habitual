@@ -33,6 +33,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,18 +43,30 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codescala.habitual.R
 import com.codescala.habitual.domain.model.DayPeriod
 import com.codescala.habitual.domain.model.Habit
 import com.codescala.habitual.navigation.Screen
+import com.codescala.habitual.presentation.common.UiAction
+import com.codescala.habitual.presentation.home.screenstate.HomeScreenState
 import com.codescala.habitual.ui.theme.BackGroundBlack
 import com.codescala.habitual.ui.theme.HabitualTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    HomeScreenUI(state = state, uiAction = viewModel::onAction)
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreenUI(
+    modifier: Modifier = Modifier,
+    uiAction: (UiAction) -> Unit,
+    state: HomeScreenState
 ) {
     Scaffold(
         topBar = {
@@ -90,7 +103,7 @@ fun HomeScreen(
                 initialPage = 0,
                 pageCount = {10}
             )
-            DateScrollableTabRow()
+            DateScrollableTabRow(state = state, uiAction = uiAction)
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
                 state = pagerState
@@ -229,7 +242,11 @@ fun HabitItem(
 }
 
 @Composable
-private fun DateScrollableTabRow(modifier: Modifier = Modifier) {
+private fun DateScrollableTabRow(
+    modifier: Modifier = Modifier,
+    state: HomeScreenState,
+    uiAction: (UiAction) -> Unit,
+) {
     ScrollableTabRow(
         modifier = modifier.fillMaxWidth(),
         edgePadding = 0.dp,
@@ -238,53 +255,60 @@ private fun DateScrollableTabRow(modifier: Modifier = Modifier) {
         indicator = {},
         divider = {},
         tabs = {
-            Tab(
-                modifier = Modifier
-                    .padding(horizontal = 6.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                text = {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Aug 2")
-                        Text("Tue")
-                    }
+            state.days.forEach {
+                Tab(
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp)
+                        .background(
+                            color = if (it == state.selectedDay)
+                                MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    text = {
+                        Column(
+                            verticalArrangement = spacedBy(3.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = it.monthDay, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = it.weekDay, style = MaterialTheme.typography.bodyMedium)
+                        }
 
-                },
-                selected = true,
-                selectedContentColor = MaterialTheme.colorScheme.background,
-                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
-                onClick = {},
-            )
-            listOf("Aug 3", "Aug 4", "Aug 5", "Aug 6", "Aug 7", "Aug 8", "Aug 9")
-                .forEach {
-                    Tab(
-                        modifier = Modifier
-                            .padding(horizontal = 6.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = RoundedCornerShape(8.dp)
-                            ),
-                        text = {
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(it)
-                                Text("Tue")
-                            }
-
-                        },
-                        selected = false,
-                        selectedContentColor = MaterialTheme.colorScheme.outline,
-                        unselectedContentColor = MaterialTheme.colorScheme.onBackground,
-                        onClick = {},
-                    )
-                }
+                    },
+                    selected = it == state.selectedDay,
+                    selectedContentColor = MaterialTheme.colorScheme.onBackground,
+                    unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                    onClick = {
+                        uiAction(UiAction.SelectDayForHabits(it))
+                    },
+                )
+            }
+//
+//            listOf("Aug 3", "Aug 4", "Aug 5", "Aug 6", "Aug 7", "Aug 8", "Aug 9")
+//                .forEach {
+//                    Tab(
+//                        modifier = Modifier
+//                            .padding(horizontal = 6.dp)
+//                            .background(
+//                                color = MaterialTheme.colorScheme.surface,
+//                                shape = RoundedCornerShape(8.dp)
+//                            ),
+//                        text = {
+//                            Column(
+//                                verticalArrangement = Arrangement.Center,
+//                                horizontalAlignment = Alignment.CenterHorizontally
+//                            ) {
+//                                Text(it)
+//                                Text("Tue")
+//                            }
+//
+//                        },
+//                        selected = false,
+//                        selectedContentColor = MaterialTheme.colorScheme.outline,
+//                        unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+//                        onClick = {},
+//                    )
+//                }
         }
     )
 }
